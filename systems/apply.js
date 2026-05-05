@@ -1,3 +1,5 @@
+console.log("Apply system loaded");
+
 const {
   ModalBuilder,
   TextInputBuilder,
