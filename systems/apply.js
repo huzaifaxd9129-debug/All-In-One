@@ -12,12 +12,12 @@ module.exports = (client) => {
 
   client.on("interactionCreate", async (interaction) => {
 
-    // ================= BUTTON CLICK =================
+    // ================= BUTTON =================
     if (interaction.isButton() && interaction.customId === "apply_open") {
 
       const modal = new ModalBuilder()
         .setCustomId("apply_form")
-        .setTitle("Staff Application Form");
+        .setTitle("Staff Application");
 
       const q1 = new TextInputBuilder()
         .setCustomId("reason")
@@ -43,7 +43,7 @@ module.exports = (client) => {
         new ActionRowBuilder().addComponents(q3)
       );
 
-      await interaction.showModal(modal);
+      return interaction.showModal(modal);
     }
 
     // ================= FORM SUBMIT =================
@@ -57,7 +57,7 @@ module.exports = (client) => {
 
       if (logChannel) {
         const embed = new EmbedBuilder()
-          .setTitle("📩 New Staff Application")
+          .setTitle("📩 Staff Application")
           .setColor("Blue")
           .addFields(
             { name: "User", value: `${interaction.user.tag}` },
@@ -69,10 +69,11 @@ module.exports = (client) => {
         logChannel.send({ embeds: [embed] });
       }
 
-      interaction.reply({
-        content: "✅ Your application has been submitted!",
+      return interaction.reply({
+        content: "✅ Application submitted!",
         ephemeral: true,
       });
     }
   });
+
 };
