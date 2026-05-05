@@ -1,37 +1,78 @@
+const {
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+  EmbedBuilder
+} = require("discord.js");
+
 const config = require("../config");
 
 module.exports = (client) => {
+
   client.on("interactionCreate", async (interaction) => {
-    try {
-      // ================= MODAL SUBMIT CHECK =================
-      if (!interaction.isModalSubmit()) return;
 
-      // customId must match your apply form
-      if (interaction.customId !== "apply_form") return;
+    // ================= BUTTON CLICK =================
+    if (interaction.isButton() && interaction.customId === "apply_open") {
 
-      // ================= GET ANSWERS =================
+      const modal = new ModalBuilder()
+        .setCustomId("apply_form")
+        .setTitle("Staff Application Form");
+
+      const q1 = new TextInputBuilder()
+        .setCustomId("reason")
+        .setLabel("Why do you want staff?")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true);
+
+      const q2 = new TextInputBuilder()
+        .setCustomId("experience")
+        .setLabel("Your experience?")
+        .setStyle(TextInputStyle.Paragraph)
+        .setRequired(true);
+
+      const q3 = new TextInputBuilder()
+        .setCustomId("age")
+        .setLabel("Your age?")
+        .setStyle(TextInputStyle.Short)
+        .setRequired(true);
+
+      modal.addComponents(
+        new ActionRowBuilder().addComponents(q1),
+        new ActionRowBuilder().addComponents(q2),
+        new ActionRowBuilder().addComponents(q3)
+      );
+
+      await interaction.showModal(modal);
+    }
+
+    // ================= FORM SUBMIT =================
+    if (interaction.isModalSubmit() && interaction.customId === "apply_form") {
+
       const reason = interaction.fields.getTextInputValue("reason");
       const experience = interaction.fields.getTextInputValue("experience");
       const age = interaction.fields.getTextInputValue("age");
 
-      // ================= LOG CHANNEL =================
       const logChannel = interaction.guild.channels.cache.get(config.logsChannel);
 
-      if (!logChannel) return;
+      if (logChannel) {
+        const embed = new EmbedBuilder()
+          .setTitle("📩 New Staff Application")
+          .setColor("Blue")
+          .addFields(
+            { name: "User", value: `${interaction.user.tag}` },
+            { name: "Reason", value: reason },
+            { name: "Experience", value: experience },
+            { name: "Age", value: age }
+          );
 
-      // ================= SEND APPLICATION =================
-      logChannel.send({
-        content: `📩 **New Staff Application**\n\n👤 User: ${interaction.user.tag}\n🆔 ID: ${interaction.user.id}\n\n📌 Reason:\n${reason}\n\n💼 Experience:\n${experience}\n\n🎂 Age:\n${age}`,
-      });
+        logChannel.send({ embeds: [embed] });
+      }
 
-      // ================= REPLY TO USER =================
-      await interaction.reply({
-        content: "✅ Your application has been submitted successfully!",
+      interaction.reply({
+        content: "✅ Your application has been submitted!",
         ephemeral: true,
       });
-
-    } catch (err) {
-      console.log("Apply System Error:", err);
     }
   });
 };
