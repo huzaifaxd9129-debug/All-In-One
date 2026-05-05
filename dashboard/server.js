@@ -28,7 +28,7 @@ app.get("/status", (req, res) => {
 });
 
 // ================= START SERVER =================
-const PORT = config.dashboardPort || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`🌐 Dashboard running on port ${PORT}`);
