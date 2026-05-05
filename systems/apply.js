@@ -1,79 +1,36 @@
 const {
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
+  EmbedBuilder,
   ActionRowBuilder,
-  EmbedBuilder
+  ButtonBuilder,
+  ButtonStyle
 } = require("discord.js");
 
 const config = require("../config");
 
-module.exports = (client) => {
+module.exports = {
+  name: "apply",
 
-  client.on("interactionCreate", async (interaction) => {
-
-    // ================= BUTTON =================
-    if (interaction.isButton() && interaction.customId === "apply_open") {
-
-      const modal = new ModalBuilder()
-        .setCustomId("apply_form")
-        .setTitle("Staff Application");
-
-      const q1 = new TextInputBuilder()
-        .setCustomId("reason")
-        .setLabel("Why do you want staff?")
-        .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true);
-
-      const q2 = new TextInputBuilder()
-        .setCustomId("experience")
-        .setLabel("Your experience?")
-        .setStyle(TextInputStyle.Paragraph)
-        .setRequired(true);
-
-      const q3 = new TextInputBuilder()
-        .setCustomId("age")
-        .setLabel("Your age?")
-        .setStyle(TextInputStyle.Short)
-        .setRequired(true);
-
-      modal.addComponents(
-        new ActionRowBuilder().addComponents(q1),
-        new ActionRowBuilder().addComponents(q2),
-        new ActionRowBuilder().addComponents(q3)
-      );
-
-      return interaction.showModal(modal);
+  async execute(message) {
+    if (!message.member.permissions.has("Administrator")) {
+      return message.reply("❌ No permission");
     }
 
-    // ================= FORM SUBMIT =================
-    if (interaction.isModalSubmit() && interaction.customId === "apply_form") {
+    const embed = new EmbedBuilder()
+      .setTitle("🧑‍💼 Staff Application")
+      .setDescription("Click the button below to apply for staff")
+      .setColor(config.color || "#2f3136");
 
-      const reason = interaction.fields.getTextInputValue("reason");
-      const experience = interaction.fields.getTextInputValue("experience");
-      const age = interaction.fields.getTextInputValue("age");
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId("apply_open")
+        .setLabel("Apply Now")
+        .setStyle(ButtonStyle.Success)
+        .setEmoji("📝")
+    );
 
-      const logChannel = interaction.guild.channels.cache.get(config.logsChannel);
-
-      if (logChannel) {
-        const embed = new EmbedBuilder()
-          .setTitle("📩 Staff Application")
-          .setColor("Blue")
-          .addFields(
-            { name: "User", value: `${interaction.user.tag}` },
-            { name: "Reason", value: reason },
-            { name: "Experience", value: experience },
-            { name: "Age", value: age }
-          );
-
-        logChannel.send({ embeds: [embed] });
-      }
-
-      return interaction.reply({
-        content: "✅ Application submitted!",
-        ephemeral: true,
-      });
-    }
-  });
-
+    message.channel.send({
+      embeds: [embed],
+      components: [row],
+    });
+  },
 };
