@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("../server");
+
 const {
   Client,
   GatewayIntentBits,
